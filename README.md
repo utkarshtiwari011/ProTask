@@ -1,78 +1,89 @@
-# ProTask - Team Task Manager
+# ProTask - Team Task Manager 🚀
 
-A full-stack collaborative task management application with role-based access control, real-time activity tracking, and team performance analytics.
+A modern, full-stack collaborative task management application featuring a futuristic glassmorphism UI, role-based access control (RBAC), real-time activity tracking, and team performance analytics. 
 
-## Features
+## 🌟 Key Features
 
-- **RBAC**: Admin and Member roles.
-- **Project Hub**: Create and manage multiple workspaces.
-- **Kanban Board**: Drag-and-drop style task tracking.
-- **Discussions**: Task-specific commenting system.
-- **Activity Log**: Real-time project action tracking.
-- **Analytics**: Team progress and efficiency metrics.
+- **Role-Based Access Control (RBAC)**: Distinct `Admin` and `Member` privileges ensuring data security.
+- **Project Hub**: Create, manage, and delete multiple workspaces. Admins can assign users to specific projects.
+- **Kanban Board UI**: Intuitive task tracking (Todo, In-Progress, Done) with smooth Framer Motion animations.
+- **Activity Log**: Real-time tracking of project and task updates.
+- **Dynamic User Profiles**: Track individual skillsets, completed tasks, and performance metrics.
+- **Team Analytics**: Visual charts (Chart.js) showing team progress and efficiency metrics.
 
 ---
 
-## Setup & Connection Instructions
+## 🛠️ Technology Stack
 
-### 1. Database Setup (MongoDB)
+- **Frontend**: React (Vite), Framer Motion (animations), Lucide React (icons), Chart.js
+- **Backend**: Node.js, Express (v5)
+- **Database**: MongoDB (Mongoose)
+- **Authentication**: JWT (JSON Web Tokens), bcryptjs
 
-You have two options for the database:
+---
 
-#### Option A: Local MongoDB (Default)
-1. Ensure [MongoDB Community Server](https://www.mongodb.com/try/download/community) is installed and running on your machine.
-2. The app will automatically connect to `mongodb://localhost:27017/protask`.
+## 💻 Local Development Setup
 
-#### Option B: MongoDB Atlas (Cloud - Recommended for Deployment)
-1. Create a free cluster on [MongoDB Atlas](https://www.mongodb.com/cloud/atlas).
-2. Get your connection string (SRV).
-3. Open `server/.env` and replace `MONGO_URI` with your connection string:
-   ```env
-   MONGO_URI=mongodb+srv://<username>:<password>@cluster0.mongodb.net/protask?retryWrites=true&w=majority
-   ```
+### 1. Database Setup
+Ensure you have MongoDB running locally, or use a free cloud cluster from [MongoDB Atlas](https://www.mongodb.com/cloud/atlas).
+If using Atlas, rename `server/.env.example` to `server/.env` and update the `MONGO_URI`. 
+
+*(Important: If your MongoDB password contains an `@` symbol, it must be URL-encoded as `%40` in the connection string)*.
 
 ### 2. Dependency Installation
-
-From the root directory, run:
+From the root directory, run the custom install script to install dependencies for both the frontend and backend simultaneously:
 ```bash
 npm run install-all
 ```
 
-### 3. Seed Initial Data (Optional)
-
-To populate the app with demo users, projects, and tasks:
+### 3. Seed Initial Data (Required for Testing)
+Populate the database with the Admin account, 10+ Test Members, demo projects, and tasks:
 ```bash
 node server/seeder.js -i
 ```
-*Note: This will clear existing data in the database.*
 
----
-
-## Running the Application
-
-### Development Mode
-
-Run both the server and client simultaneously from the root:
+### 4. Start the Application
+Run both the frontend and backend servers at the same time:
 ```bash
-# Start Backend (Port 5000)
+# Backend runs on Port 5000, Frontend runs on Port 5173/5174
 npm run server
-
-# Start Frontend (Port 5173)
 npm run client
 ```
 
-### Production Build
+---
 
-To build the frontend and serve it from the backend (as on Railway/Heroku):
-```bash
-npm run build
-npm start
-```
+## ☁️ Deployment Guide (Railway / Render)
+
+This application is configured as a monorepo and is fully ready for deployment platforms like [Railway]([https://railway.app/](https://web-production-3b334.up.railway.app/login)).
+
+### Step 1: Deploy from GitHub
+1. Push this repository to GitHub.
+2. In Railway, click **New Project** -> **Deploy from GitHub repo**.
+3. Select your repository. Railway will automatically detect the root `package.json` and use the `npm run build` and `npm start` commands to build and serve the application.
+
+### Step 2: Configure MongoDB Atlas for Deployment
+By default, MongoDB Atlas blocks connections from cloud servers like Railway. **You must allow access:**
+1. Go to your MongoDB Atlas Dashboard.
+2. Navigate to **Security** -> **Network Access**.
+3. Click **+ Add IP Address**.
+4. Select **Allow Access From Anywhere** (this will add `0.0.0.0/0`).
+5. Click **Confirm**.
+
+### Step 3: Add Environment Variables
+In your Railway project dashboard, go to the **Variables** tab and add:
+- `MONGO_URI`: Your MongoDB Atlas Connection String *(Remember to URL encode special characters in your password!)*
+- `JWT_SECRET`: Any random secure string (e.g., `supersecret123`)
 
 ---
 
-## Credentials (Demo)
+## 🔑 Demo Credentials
 
-If you ran the seeder, use these logins:
-- **Admin**: `admin@test.com` / `password123`
-- **Member**: `sarah@test.com` / `password123`
+Once the database is seeded (`node server/seeder.js -i`), you can log in with:
+
+**Admin Account** (Full Access)
+- **Email**: `admin@test.com`
+- **Password**: `password123`
+
+**Standard Members** (Limited Access)
+- **Email**: `sarah@test.com` (or `mike@test.com`, `member4@test.com`... up to `member13@test.com`)
+- **Password**: `password123`

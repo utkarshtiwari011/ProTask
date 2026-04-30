@@ -1,16 +1,16 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import api from '../utils/api';
-import { motion } from 'framer-motion';
+import { AuthContext } from '../context/AuthContext';
 import { 
-  CheckCircle2, Clock, AlertCircle, TrendingUp, 
-  Target, Award, Calendar, Inbox, Check, X
+  ClipboardList, RefreshCw, CheckSquare, AlertTriangle, 
+  Check, X
 } from 'lucide-react';
 
 const MemberDashboard = () => {
+  const { user } = useContext(AuthContext);
   const [data, setData] = useState(null);
   const [assignments, setAssignments] = useState([]);
   const [loading, setLoading] = useState(true);
-
   const [error, setError] = useState(null);
 
   useEffect(() => {
@@ -44,173 +44,143 @@ const MemberDashboard = () => {
     }
   };
 
-  if (loading) return <div style={{ padding: '20px', textAlign: 'center', color: 'var(--text-muted)' }}>Loading reports...</div>;
-  if (error) return <div style={{ padding: '20px', textAlign: 'center', color: 'var(--error)', background: 'rgba(239, 68, 68, 0.1)', borderRadius: '12px', marginBottom: '30px' }}>Dashboard Error: {error}. Please refresh or contact an administrator.</div>;
+  if (loading) return <div style={{ padding: '40px', color: 'var(--text-muted)' }}>Loading dashboard...</div>;
+  if (error) return <div style={{ padding: '20px', color: 'var(--error)', background: 'rgba(239, 68, 68, 0.1)', borderRadius: '12px' }}>Dashboard Error: {error}</div>;
   if (!data) return null;
 
   const { stats, projects } = data;
 
   const statCards = [
     { 
-      label: 'Performance', 
-      value: `${stats.performance}%`, 
-      icon: <Award size={24} color="var(--secondary)" />,
-      desc: 'Based on task completion'
+      label: 'Total Tasks', 
+      value: stats.todo + stats.inProgress + stats.done, 
+      icon: <ClipboardList size={24} color="#f59e0b" />,
+      bg: 'rgba(245, 158, 11, 0.1)'
     },
     { 
-      label: 'Active Tasks', 
-      value: stats.inProgress + stats.todo, 
-      icon: <Target size={24} color="var(--primary)" />,
-      desc: 'Work currently assigned'
+      label: 'In Progress', 
+      value: stats.inProgress, 
+      icon: <RefreshCw size={24} color="#3b82f6" />,
+      bg: 'rgba(59, 130, 246, 0.1)'
     },
     { 
       label: 'Completed', 
       value: stats.done, 
-      icon: <CheckCircle2 size={24} color="var(--success)" />,
-      desc: 'Lifetime contributions'
+      icon: <CheckSquare size={24} color="#10b981" />,
+      bg: 'rgba(16, 185, 129, 0.1)'
     },
     { 
       label: 'High Priority', 
       value: stats.highPriority, 
-      icon: <AlertCircle size={24} color="var(--error)" />,
-      desc: 'Urgent attention required'
+      icon: <AlertTriangle size={24} color="#ef4444" />,
+      bg: 'rgba(239, 68, 68, 0.1)'
     }
   ];
 
+  // Flatten active tasks from projects for the table
+  const activeTasks = projects.flatMap(p => p.tasks.map(t => ({...t, project: p})));
+  const allTableItems = [...assignments, ...activeTasks];
+
   return (
-    <div style={{ marginBottom: '40px' }}>
-      <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '24px' }}>
-        <TrendingUp size={24} color="var(--primary)" />
-        <h2 style={{ fontSize: '1.5rem', fontWeight: '600' }}>My Performance Report</h2>
-      </div>
+    <div style={{ padding: '0 0 40px 0' }}>
+      <header style={{ marginBottom: '30px' }}>
+        <h1 style={{ fontSize: '2rem', fontWeight: '700', marginBottom: '4px' }}>Dashboard</h1>
+        <p style={{ color: 'var(--text-muted)', fontSize: '1rem' }}>Good morning, {user?.name || 'Member'}!</p>
+      </header>
 
       <div style={{ 
         display: 'grid', 
-        gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', 
+        gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', 
         gap: '20px',
-        marginBottom: '30px'
+        marginBottom: '40px'
       }}>
         {statCards.map((card, index) => (
-          <motion.div
-            key={index}
-            initial={{ opacity: 0, scale: 0.9 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ delay: index * 0.1 }}
-            className="glass-card"
-            style={{ padding: '24px' }}
-          >
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start', marginBottom: '16px' }}>
-              <div style={{ padding: '10px', background: 'rgba(255,255,255,0.05)', borderRadius: '12px' }}>
-                {card.icon}
-              </div>
-              <div style={{ 
-                fontSize: '1.8rem', 
-                fontWeight: '700', 
-                background: 'linear-gradient(135deg, white, #94a3b8)',
-                WebkitBackgroundClip: 'text',
-                WebkitTextFillColor: 'transparent'
-              }}>
+          <div key={index} className="flat-card" style={{ padding: '20px', display: 'flex', alignItems: 'center', gap: '16px' }}>
+            <div style={{ 
+              width: '50px', height: '50px', borderRadius: '10px', 
+              background: card.bg, display: 'flex', justifyContent: 'center', alignItems: 'center' 
+            }}>
+              {card.icon}
+            </div>
+            <div>
+              <div style={{ fontSize: '1.8rem', fontWeight: '700', color: 'var(--primary)', lineHeight: '1' }}>
                 {card.value}
               </div>
+              <div style={{ fontSize: '0.85rem', color: 'var(--text-muted)', marginTop: '4px' }}>
+                {card.label}
+              </div>
             </div>
-            <h3 style={{ fontSize: '1rem', fontWeight: '600', marginBottom: '4px' }}>{card.label}</h3>
-            <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>{card.desc}</p>
-          </motion.div>
+          </div>
         ))}
       </div>
 
-      {assignments.length > 0 && (
-        <div className="glass-card" style={{ padding: '24px', marginBottom: '30px', borderLeft: '4px solid var(--secondary)' }}>
-            <h3 style={{ fontSize: '1.2rem', marginBottom: '20px', display: 'flex', alignItems: 'center', gap: '10px', color: 'var(--secondary)' }}>
-                <Inbox size={20} /> Pending Assignments ({assignments.length})
-            </h3>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-                {assignments.map(task => (
-                    <div key={task._id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '16px', background: 'rgba(255,255,255,0.03)', borderRadius: '12px' }}>
-                        <div>
-                            <div style={{ fontWeight: '600', marginBottom: '4px', fontSize: '1.1rem' }}>{task.title}</div>
-                            <div style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>
-                                Project: <span style={{ color: 'white' }}>{task.project.name}</span> • Priority: {task.priority}
-                            </div>
-                        </div>
-                        <div style={{ display: 'flex', gap: '10px' }}>
-                            <button 
-                                onClick={() => handleAssignment(task._id, 'accepted')}
-                                style={{ display: 'flex', alignItems: 'center', gap: '6px', background: 'var(--success)', color: 'white', padding: '8px 16px', borderRadius: '8px', fontSize: '0.9rem', fontWeight: '600' }}
-                            >
-                                <Check size={16} /> Accept
-                            </button>
-                            <button 
-                                onClick={() => handleAssignment(task._id, 'rejected')}
-                                style={{ display: 'flex', alignItems: 'center', gap: '6px', background: 'rgba(239, 68, 68, 0.2)', color: 'var(--error)', padding: '8px 16px', borderRadius: '8px', fontSize: '0.9rem', fontWeight: '600' }}
-                            >
-                                <X size={16} /> Reject
-                            </button>
-                        </div>
-                    </div>
-                ))}
-            </div>
-        </div>
-      )}
-
-      <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '24px' }}>
-        <div className="glass-card" style={{ padding: '24px' }}>
-            <h3 style={{ fontSize: '1.2rem', marginBottom: '20px', display: 'flex', alignItems: 'center', gap: '10px' }}>
-                <Calendar size={20} color="var(--primary)" /> Ongoing Projects & Tasks
-            </h3>
-            {projects.length === 0 ? (
-                <p style={{ color: 'var(--text-muted)' }}>You are not currently assigned to any projects.</p>
-            ) : (
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
-                    {projects.map(project => (
-                        <div key={project._id} style={{ padding: '16px', background: 'rgba(255,255,255,0.02)', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.05)' }}>
-                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
-                                <div>
-                                    <div style={{ fontWeight: '600', fontSize: '1.1rem' }}>{project.name}</div>
-                                    <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>Your Project Efficiency: <strong style={{ color: 'var(--success)' }}>{project.performance}%</strong></div>
-                                </div>
-                                <div style={{ fontSize: '0.8rem', background: 'rgba(99, 102, 241, 0.1)', color: 'var(--primary)', padding: '4px 12px', borderRadius: '12px' }}>
-                                    Active Contributor
-                                </div>
-                            </div>
-                            
-                            {project.tasks.length > 0 ? (
-                                <div>
-                                    <h4 style={{ fontSize: '0.85rem', color: 'var(--text-muted)', marginBottom: '8px', textTransform: 'uppercase', letterSpacing: '1px' }}>Your Current To-Do List</h4>
-                                    <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                                        {project.tasks.map(task => (
-                                            <div key={task._id} style={{ display: 'flex', justifyContent: 'space-between', padding: '10px', background: 'rgba(0,0,0,0.2)', borderRadius: '8px' }}>
-                                                <span style={{ fontSize: '0.9rem' }}>{task.title}</span>
-                                                <span style={{ fontSize: '0.8rem', color: task.priority === 'high' ? 'var(--error)' : 'var(--text-muted)' }}>
-                                                    {task.status}
-                                                </span>
-                                            </div>
-                                        ))}
-                                    </div>
-                                </div>
-                            ) : (
-                                <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)', fontStyle: 'italic' }}>No active tasks for you right now.</p>
-                            )}
-                        </div>
-                    ))}
-                </div>
-            )}
+      <div className="flat-card" style={{ padding: '24px' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
+          <h3 style={{ fontSize: '1.2rem', fontWeight: '600' }}>Recent Tasks</h3>
+          <button style={{ 
+            background: 'transparent', border: '1px solid var(--glass-border)', 
+            color: 'var(--text-muted)', padding: '6px 12px', borderRadius: '6px', fontSize: '0.8rem' 
+          }}>
+            View All &rarr;
+          </button>
         </div>
 
-        <div className="glass-card" style={{ padding: '24px', display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', textAlign: 'center' }}>
-            <div style={{ 
-                width: '120px', height: '120px', borderRadius: '50%', 
-                border: '4px solid var(--primary)', 
-                display: 'flex', justifyContent: 'center', alignItems: 'center',
-                fontSize: '2rem', fontWeight: 'bold', marginBottom: '16px',
-                boxShadow: '0 0 20px rgba(99, 102, 241, 0.3)'
-            }}>
-                {stats.performance}%
-            </div>
-            <h3 style={{ marginBottom: '8px', fontSize: '1.3rem' }}>Efficiency Score</h3>
-            <p style={{ fontSize: '0.9rem', color: 'var(--text-muted)', lineHeight: '1.5' }}>
-                Great job! You are performing better than 85% of team members this month. Keep completing tasks to raise your score.
-            </p>
+        <div style={{ width: '100%', overflowX: 'auto' }}>
+          <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
+            <thead>
+              <tr style={{ borderBottom: '1px solid var(--glass-border)' }}>
+                <th style={{ padding: '12px 16px', color: 'var(--text-muted)', fontSize: '0.75rem', fontWeight: '600', letterSpacing: '1px' }}>TASK</th>
+                <th style={{ padding: '12px 16px', color: 'var(--text-muted)', fontSize: '0.75rem', fontWeight: '600', letterSpacing: '1px' }}>PROJECT</th>
+                <th style={{ padding: '12px 16px', color: 'var(--text-muted)', fontSize: '0.75rem', fontWeight: '600', letterSpacing: '1px' }}>PRIORITY</th>
+                <th style={{ padding: '12px 16px', color: 'var(--text-muted)', fontSize: '0.75rem', fontWeight: '600', letterSpacing: '1px' }}>STATUS / ACTION</th>
+              </tr>
+            </thead>
+            <tbody>
+              {allTableItems.length === 0 ? (
+                <tr>
+                  <td colSpan="4" style={{ padding: '40px', textAlign: 'center', color: 'var(--text-muted)', fontSize: '0.9rem' }}>
+                    No tasks yet. Create a project and add tasks!
+                  </td>
+                </tr>
+              ) : (
+                allTableItems.map(item => {
+                  const isPending = item.assignmentStatus === 'pending';
+                  
+                  return (
+                    <tr key={item._id} style={{ borderBottom: '1px solid rgba(255,255,255,0.02)' }}>
+                      <td style={{ padding: '16px', fontWeight: '500' }}>{item.title}</td>
+                      <td style={{ padding: '16px', color: 'var(--text-muted)' }}>{item.project?.name || 'Unknown'}</td>
+                      <td style={{ padding: '16px' }}>
+                        <span style={{ 
+                          padding: '4px 8px', borderRadius: '4px', fontSize: '0.75rem', fontWeight: '600',
+                          background: item.priority === 'high' ? 'rgba(239, 68, 68, 0.1)' : 'rgba(255,255,255,0.05)',
+                          color: item.priority === 'high' ? 'var(--error)' : 'var(--text-muted)'
+                        }}>
+                          {item.priority.toUpperCase()}
+                        </span>
+                      </td>
+                      <td style={{ padding: '16px' }}>
+                        {isPending ? (
+                          <div style={{ display: 'flex', gap: '8px' }}>
+                            <button onClick={() => handleAssignment(item._id, 'accepted')} style={{ display: 'flex', alignItems: 'center', gap: '4px', background: 'rgba(16, 185, 129, 0.1)', color: 'var(--success)', padding: '4px 8px', borderRadius: '4px', fontSize: '0.8rem', fontWeight: '600' }}>
+                              <Check size={14} /> Accept
+                            </button>
+                            <button onClick={() => handleAssignment(item._id, 'rejected')} style={{ display: 'flex', alignItems: 'center', gap: '4px', background: 'rgba(239, 68, 68, 0.1)', color: 'var(--error)', padding: '4px 8px', borderRadius: '4px', fontSize: '0.8rem', fontWeight: '600' }}>
+                              <X size={14} /> Reject
+                            </button>
+                          </div>
+                        ) : (
+                          <span style={{ color: 'var(--primary)', fontSize: '0.85rem', fontWeight: '500' }}>
+                            {item.status.replace('-', ' ').toUpperCase()}
+                          </span>
+                        )}
+                      </td>
+                    </tr>
+                  )
+                })
+              )}
+            </tbody>
+          </table>
         </div>
       </div>
     </div>

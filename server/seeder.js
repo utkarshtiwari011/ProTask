@@ -49,6 +49,17 @@ const seedData = async () => {
       role: 'member'
     });
 
+    const extraMembers = [];
+    for (let i = 4; i <= 13; i++) {
+      const newMember = await User.create({
+        name: `Test Member ${i}`,
+        email: `member${i}@test.com`,
+        password: 'password123',
+        role: 'member'
+      });
+      extraMembers.push(newMember);
+    }
+
     console.log('Users Created...'.green.inverse);
 
     // Create Projects

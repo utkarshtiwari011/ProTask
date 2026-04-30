@@ -77,6 +77,7 @@ const Dashboard = () => {
       fetchRecentActivities();
     } catch (err) {
       console.error(err);
+      alert(err.response?.data?.error || 'Failed to create project');
     }
   };
 

@@ -5,7 +5,8 @@ const colors = require('colors');
 const connectDB = require('./config/db');
 
 // Load env vars
-dotenv.config();
+const path = require('path');
+dotenv.config({ path: path.join(__dirname, '.env') });
 
 // Connect to database
 connectDB();
@@ -33,14 +34,19 @@ app.use('/api/users', users);
 
 const PORT = process.env.PORT || 5000;
 
-// Serve frontend static files in production
-if (process.env.NODE_ENV === 'production') {
-  const path = require('path');
-  app.use(express.static(path.join(__dirname, '../client/dist')));
+// Serve frontend static files
+// We remove the strict NODE_ENV check because Railway might not set it by default.
+// Instead, we serve the dist folder if it exists.
+const fs = require('fs');
+const distPath = path.join(__dirname, '../client/dist');
+if (fs.existsSync(distPath)) {
+  app.use(express.static(distPath));
 
-  app.use((req, res) => {
-    res.sendFile(path.resolve(__dirname, '..', 'client', 'dist', 'index.html'));
+  app.get('*', (req, res) => {
+    res.sendFile(path.join(distPath, 'index.html'));
   });
+} else {
+  app.get('/', (req, res) => res.send('Backend API is running. Please run frontend separately in development.'));
 }
 
 const server = app.listen(

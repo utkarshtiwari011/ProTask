@@ -11,12 +11,15 @@ const MemberDashboard = () => {
   const [assignments, setAssignments] = useState([]);
   const [loading, setLoading] = useState(true);
 
+  const [error, setError] = useState(null);
+
   useEffect(() => {
     fetchData();
   }, []);
 
   const fetchData = async () => {
     setLoading(true);
+    setError(null);
     try {
       const [statsRes, assignmentsRes] = await Promise.all([
         api.get('/users/stats'),
@@ -26,6 +29,7 @@ const MemberDashboard = () => {
       setAssignments(assignmentsRes.data.data);
     } catch (err) {
       console.error(err);
+      setError(err.response?.data?.error || err.message || 'Failed to load dashboard data');
     } finally {
       setLoading(false);
     }
@@ -40,7 +44,8 @@ const MemberDashboard = () => {
     }
   };
 
-  if (loading) return <div>Loading reports...</div>;
+  if (loading) return <div style={{ padding: '20px', textAlign: 'center', color: 'var(--text-muted)' }}>Loading reports...</div>;
+  if (error) return <div style={{ padding: '20px', textAlign: 'center', color: 'var(--error)', background: 'rgba(239, 68, 68, 0.1)', borderRadius: '12px', marginBottom: '30px' }}>Dashboard Error: {error}. Please refresh or contact an administrator.</div>;
   if (!data) return null;
 
   const { stats, projects } = data;

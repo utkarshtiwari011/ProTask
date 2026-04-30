@@ -1,0 +1,11 @@
+{
+  "name": "protask-root",
+  "version": "1.0.0",
+  "scripts": {
+    "start": "node server/server.js",
+    "build": "cd client && npm install && npm run build",
+    "server": "cd server && npm start",
+    "client": "cd client && npm run dev",
+    "install-all": "npm install && cd server && npm install && cd ../client && npm install"
+  }
+}

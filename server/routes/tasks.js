@@ -88,6 +88,43 @@ router.put('/:id', protect, async (req, res) => {
   }
 });
 
+// @desc    Accept or reject task assignment
+// @route   PUT /api/tasks/:id/assignment
+// @access  Private
+router.put('/:id/assignment', protect, async (req, res) => {
+  try {
+    const task = await Task.findById(req.params.id);
+
+    if (!task) {
+      return res.status(404).json({ success: false, error: 'Task not found' });
+    }
+
+    if (task.assignedTo.toString() !== req.user.id) {
+      return res.status(401).json({ success: false, error: 'Not authorized to accept or reject this task' });
+    }
+
+    const { status } = req.body; // 'accepted' or 'rejected'
+
+    if (!['accepted', 'rejected'].includes(status)) {
+        return res.status(400).json({ success: false, error: 'Invalid status. Must be accepted or rejected' });
+    }
+
+    task.assignmentStatus = status;
+    await task.save();
+
+    await Activity.create({
+      user: req.user.id,
+      project: task.project,
+      type: 'task_updated',
+      description: `${status} the assignment for task "${task.title}"`,
+    });
+
+    res.status(200).json({ success: true, data: task });
+  } catch (err) {
+    res.status(400).json({ success: false, error: err.message });
+  }
+});
+
 // @desc    Add comment to task
 // @route   POST /api/tasks/:id/comment
 // @access  Private

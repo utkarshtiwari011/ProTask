@@ -54,7 +54,7 @@ npm run client
 
 ## ☁️ Deployment Guide (Railway / Render)
 
-This application is configured as a monorepo and is fully ready for deployment platforms like [Railway]([https://railway.app/](https://web-production-3b334.up.railway.app/login)).
+This application is configured as a monorepo and is fully ready for deployment platforms like [Railway](https://web-production-3b334.up.railway.app/login).
 
 ### Step 1: Deploy from GitHub
 1. Push this repository to GitHub.

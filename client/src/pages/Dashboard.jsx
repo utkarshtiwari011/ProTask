@@ -94,12 +94,8 @@ const Dashboard = () => {
 
   if (loading) return <div style={{ textAlign: 'center', marginTop: '100px' }}>Loading projects...</div>;
 
-  if (user.role === 'member') {
-    return <MemberDashboard />;
-  }
-
   return (
-    <div style={{ padding: '0 0 40px 0' }}>
+    <div style={{ padding: '40px 0' }}>
       <header style={{ 
         display: 'flex', 
         justifyContent: 'space-between', 
@@ -118,6 +114,8 @@ const Dashboard = () => {
           </button>
         )}
       </header>
+
+      {user.role === 'member' && <MemberDashboard />}
 
       <div style={{ display: 'grid', gridTemplateColumns: '2.5fr 1fr', gap: '30px', alignItems: 'start' }}>
         <div style={{ 

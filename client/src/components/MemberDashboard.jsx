@@ -21,9 +21,10 @@ const MemberDashboard = () => {
     setLoading(true);
     setError(null);
     try {
+      const timestamp = Date.now();
       const [statsRes, assignmentsRes] = await Promise.all([
-        api.get('/users/stats'),
-        api.get('/users/assignments')
+        api.get(`/users/stats?t=${timestamp}`),
+        api.get(`/users/assignments?t=${timestamp}`)
       ]);
       setData(statsRes.data.data);
       setAssignments(assignmentsRes.data.data);

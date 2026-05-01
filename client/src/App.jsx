@@ -6,7 +6,7 @@ import Register from './pages/Register';
 import Dashboard from './pages/Dashboard';
 import ProjectDetails from './pages/ProjectDetails';
 import Profile from './pages/Profile';
-import Sidebar from './components/Sidebar';
+import Navbar from './components/Navbar';
 
 const PrivateRoute = ({ children }) => {
   const { user, loading } = useContext(AuthContext);
@@ -18,9 +18,9 @@ function App() {
   return (
     <AuthProvider>
       <Router>
-        <div className="app-layout">
-          <Sidebar />
-          <main className="main-content">
+        <div className="app">
+          <Navbar />
+          <main className="container">
             <Routes>
               <Route path="/login" element={<Login />} />
               <Route path="/register" element={<Register />} />

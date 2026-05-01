@@ -17,6 +17,7 @@ const Navbar = () => {
   return (
     <nav className="navbar glass-card" style={{ 
       margin: '20px auto', 
+      width: '100%',
       maxWidth: '1200px', 
       padding: '12px 24px',
       display: 'flex',
